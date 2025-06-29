@@ -2,17 +2,17 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local player = game.Players.LocalPlayer
 
 local Window = Rayfield:CreateWindow({
-    Name = "Troll Script",
-    LoadingTitle = "Troll script",
+    Name = "Troll Panel 😈",
+    LoadingTitle = "Getting Evil...",
     LoadingSubtitle = "By Hunter!",
     ConfigurationSaving = {
         Enabled = false,
     }
 })
-
 local MainTab = Window:CreateTab("Main", 4483362458)
 
--- Loop Touch 🔁 (MAX)
+-- Loop touch
+-- MAX SPEED LOOP TOUCH 🔁💥
 local loopTouching = false
 
 MainTab:CreateButton({
@@ -39,17 +39,16 @@ MainTab:CreateButton({
                         end
                     end
                 end
-                task.wait() -- as fast as possible
+                task.wait() -- No delay: as fast as possible
             end
         end)
     end
 })
 
--- Walk on Air ☁️
+-- WALK ON AIR
 local UIS = game:GetService("UserInputService")
 local walkOnAir = false
 local BodyVelocity = nil
-
 MainTab:CreateButton({
     Name = "Walk on Air ☁️",
     Callback = function()
@@ -59,16 +58,13 @@ MainTab:CreateButton({
             Content = walkOnAir and "Enabled" or "Disabled",
             Duration = 3
         })
-
         local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
         if not hrp then return end
-
         if walkOnAir then
             BodyVelocity = Instance.new("BodyVelocity")
             BodyVelocity.Velocity = Vector3.new(0, 0, 0)
             BodyVelocity.MaxForce = Vector3.new(0, 1e9, 0)
             BodyVelocity.Parent = hrp
-
             UIS.JumpRequest:Connect(function()
                 if walkOnAir then
                     hrp.Velocity = Vector3.new(0, 50, 0)
@@ -80,7 +76,7 @@ MainTab:CreateButton({
     end
 })
 
--- Teleport to Troll Button 🛸
+-- Teleport to button
 MainTab:CreateButton({
     Name = "Teleport to Troll Button 🛸",
     Callback = function()
@@ -88,7 +84,7 @@ MainTab:CreateButton({
     end
 })
 
--- Fly ✈️
+-- Fly
 MainTab:CreateButton({
     Name = "Fly ✈️",
     Callback = function()
@@ -96,6 +92,7 @@ MainTab:CreateButton({
         local char = plr.Character or plr.CharacterAdded:Wait()
         local hrp = char:WaitForChild("HumanoidRootPart")
 
+        local UIS = game:GetService("UserInputService")
         local flying = true
         local speed = 50
 
@@ -120,8 +117,7 @@ MainTab:CreateButton({
             w = false, s = false, a = false, d = false
         }
 
-        local UIS = game:GetService("UserInputService")
-
+        -- Direction tracking
         UIS.InputBegan:Connect(function(input, gpe)
             if gpe then return end
             local key = input.KeyCode
@@ -151,6 +147,7 @@ MainTab:CreateButton({
             if key == Enum.KeyCode.D then direction.d = false end
         end)
 
+        -- Movement loop
         while flying and bv and bg do
             task.wait()
             local cam = workspace.CurrentCamera
@@ -160,8 +157,4 @@ MainTab:CreateButton({
             if direction.a then move -= cam.CFrame.RightVector end
             if direction.d then move += cam.CFrame.RightVector end
 
-            bv.Velocity = move.Magnitude > 0 and move.Unit * speed or Vector3.zero
-            bg.CFrame = cam.CFrame
-        end
-    end
-})
+            bv.Velocity = move.Unit * speed
