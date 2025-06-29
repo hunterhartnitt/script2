@@ -11,10 +11,8 @@ local Window = Rayfield:CreateWindow({
 })
 local MainTab = Window:CreateTab("Main", 4483362458)
 
--- Loop touch
--- MAX SPEED LOOP TOUCH 🔁💥
+-- Loop Touch 🔁💥
 local loopTouching = false
-
 MainTab:CreateButton({
     Name = "Loop Touch 🔁 (MAX)",
     Callback = function()
@@ -39,13 +37,13 @@ MainTab:CreateButton({
                         end
                     end
                 end
-                task.wait() -- No delay: as fast as possible
+                task.wait()
             end
         end)
     end
 })
 
--- WALK ON AIR
+-- Walk on Air ☁️
 local UIS = game:GetService("UserInputService")
 local walkOnAir = false
 local BodyVelocity = nil
@@ -58,13 +56,16 @@ MainTab:CreateButton({
             Content = walkOnAir and "Enabled" or "Disabled",
             Duration = 3
         })
+
         local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
         if not hrp then return end
+
         if walkOnAir then
             BodyVelocity = Instance.new("BodyVelocity")
             BodyVelocity.Velocity = Vector3.new(0, 0, 0)
             BodyVelocity.MaxForce = Vector3.new(0, 1e9, 0)
             BodyVelocity.Parent = hrp
+
             UIS.JumpRequest:Connect(function()
                 if walkOnAir then
                     hrp.Velocity = Vector3.new(0, 50, 0)
@@ -76,15 +77,23 @@ MainTab:CreateButton({
     end
 })
 
--- Teleport to button
+-- Teleport to Troll Button 🛸
 MainTab:CreateButton({
     Name = "Teleport to Troll Button 🛸",
     Callback = function()
-        player.Character.HumanoidRootPart.CFrame = workspace.Gudock.CFrame + Vector3.new(0, 5, 0)
+        if workspace:FindFirstChild("Gudock") then
+            player.Character.HumanoidRootPart.CFrame = workspace.Gudock.CFrame + Vector3.new(0, 5, 0)
+        else
+            Rayfield:Notify({
+                Title = "Teleport Failed",
+                Content = "Gudock not found in Workspace!",
+                Duration = 3
+            })
+        end
     end
 })
 
--- Fly
+-- Fly ✈️
 MainTab:CreateButton({
     Name = "Fly ✈️",
     Callback = function()
@@ -117,7 +126,6 @@ MainTab:CreateButton({
             w = false, s = false, a = false, d = false
         }
 
-        -- Direction tracking
         UIS.InputBegan:Connect(function(input, gpe)
             if gpe then return end
             local key = input.KeyCode
@@ -147,7 +155,6 @@ MainTab:CreateButton({
             if key == Enum.KeyCode.D then direction.d = false end
         end)
 
-        -- Movement loop
         while flying and bv and bg do
             task.wait()
             local cam = workspace.CurrentCamera
@@ -157,4 +164,13 @@ MainTab:CreateButton({
             if direction.a then move -= cam.CFrame.RightVector end
             if direction.d then move += cam.CFrame.RightVector end
 
-            bv.Velocity = move.Unit * speed
+            if move ~= Vector3.zero then
+                bv.Velocity = move.Unit * speed
+            else
+                bv.Velocity = Vector3.zero
+            end
+
+            bg.CFrame = cam.CFrame
+        end
+    end
+})
