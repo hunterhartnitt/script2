@@ -93,7 +93,6 @@ MainTab:CreateButton({
     end
 })
 
--- Fly ✈️
 MainTab:CreateButton({
     Name = "Fly ✈️",
     Callback = function()
@@ -155,22 +154,26 @@ MainTab:CreateButton({
             if key == Enum.KeyCode.D then direction.d = false end
         end)
 
-        while flying and bv and bg do
-            task.wait()
-            local cam = workspace.CurrentCamera
-            local move = Vector3.zero
-            if direction.w then move += cam.CFrame.LookVector end
-            if direction.s then move -= cam.CFrame.LookVector end
-            if direction.a then move -= cam.CFrame.RightVector end
-            if direction.d then move += cam.CFrame.RightVector end
+        task.spawn(function()
+            while flying and bv and bg and hrp do
+                task.wait()
+                local cam = workspace.CurrentCamera
+                local move = Vector3.new()
 
-            if move ~= Vector3.zero then
-                bv.Velocity = move.Unit * speed
-            else
-                bv.Velocity = Vector3.zero
+                if direction.w then move += cam.CFrame.LookVector end
+                if direction.s then move -= cam.CFrame.LookVector end
+                if direction.a then move -= cam.CFrame.RightVector end
+                if direction.d then move += cam.CFrame.RightVector end
+
+                if move.Magnitude > 0 then
+                    bv.Velocity = move.Unit * speed
+                else
+                    bv.Velocity = Vector3.zero
+                end
+
+                bg.CFrame = cam.CFrame
             end
-
-            bg.CFrame = cam.CFrame
-        end
+        end)
     end
 })
+
