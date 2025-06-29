@@ -1,5 +1,6 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local player = game.Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
 
 local Window = Rayfield:CreateWindow({
     Name = "Troll Panel 😈",
@@ -9,9 +10,11 @@ local Window = Rayfield:CreateWindow({
         Enabled = false,
     }
 })
+
+-- MAIN TAB
 local MainTab = Window:CreateTab("Main", 4483362458)
 
--- Loop Touch 🔁💥
+-- Loop Touch Button
 local loopTouching = false
 MainTab:CreateButton({
     Name = "Loop Touch 🔁 (MAX)",
@@ -43,8 +46,7 @@ MainTab:CreateButton({
     end
 })
 
--- Walk on Air ☁️
-local UIS = game:GetService("UserInputService")
+-- Walk on Air
 local walkOnAir = false
 local BodyVelocity = nil
 MainTab:CreateButton({
@@ -56,16 +58,12 @@ MainTab:CreateButton({
             Content = walkOnAir and "Enabled" or "Disabled",
             Duration = 3
         })
-
         local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
         if not hrp then return end
-
         if walkOnAir then
-            BodyVelocity = Instance.new("BodyVelocity")
+            BodyVelocity = Instance.new("BodyVelocity", hrp)
             BodyVelocity.Velocity = Vector3.new(0, 0, 0)
             BodyVelocity.MaxForce = Vector3.new(0, 1e9, 0)
-            BodyVelocity.Parent = hrp
-
             UIS.JumpRequest:Connect(function()
                 if walkOnAir then
                     hrp.Velocity = Vector3.new(0, 50, 0)
@@ -77,103 +75,147 @@ MainTab:CreateButton({
     end
 })
 
--- Teleport to Troll Button 🛸
+-- Teleport
 MainTab:CreateButton({
     Name = "Teleport to Troll Button 🛸",
     Callback = function()
-        if workspace:FindFirstChild("Gudock") then
-            player.Character.HumanoidRootPart.CFrame = workspace.Gudock.CFrame + Vector3.new(0, 5, 0)
-        else
-            Rayfield:Notify({
-                Title = "Teleport Failed",
-                Content = "Gudock not found in Workspace!",
-                Duration = 3
-            })
+        local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+        if hrp and workspace:FindFirstChild("Gudock") then
+            hrp.CFrame = workspace.Gudock.CFrame + Vector3.new(0, 5, 0)
         end
     end
 })
 
+-- Fly Toggle GUI Button
+local flying = false
+local flyConnection
 MainTab:CreateButton({
-    Name = "Fly ✈️",
+    Name = "Toggle Fly ✈️",
     Callback = function()
-        local plr = game.Players.LocalPlayer
-        local char = plr.Character or plr.CharacterAdded:Wait()
-        local hrp = char:WaitForChild("HumanoidRootPart")
-
-        local UIS = game:GetService("UserInputService")
-        local flying = true
-        local speed = 50
-
+        flying = not flying
         Rayfield:Notify({
             Title = "Fly Mode",
-            Content = "Fly Enabled — Press E to toggle",
-            Duration = 4
+            Content = flying and "Enabled" or "Disabled",
+            Duration = 3
         })
 
-        local bg = Instance.new("BodyGyro")
-        bg.P = 9e4
-        bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-        bg.CFrame = hrp.CFrame
-        bg.Parent = hrp
+        local char = player.Character
+        if not char then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
 
-        local bv = Instance.new("BodyVelocity")
-        bv.Velocity = Vector3.new(0, 0, 0)
-        bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-        bv.Parent = hrp
+        if flying then
+            local bg = Instance.new("BodyGyro", hrp)
+            bg.P = 9e4
+            bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+            bg.CFrame = hrp.CFrame
 
-        local direction = {
-            w = false, s = false, a = false, d = false
-        }
+            local bv = Instance.new("BodyVelocity", hrp)
+            bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+            bv.Velocity = Vector3.zero
 
-        UIS.InputBegan:Connect(function(input, gpe)
-            if gpe then return end
-            local key = input.KeyCode
-            if key == Enum.KeyCode.W then direction.w = true end
-            if key == Enum.KeyCode.S then direction.s = true end
-            if key == Enum.KeyCode.A then direction.a = true end
-            if key == Enum.KeyCode.D then direction.d = true end
-            if key == Enum.KeyCode.E then
-                flying = not flying
-                Rayfield:Notify({
-                    Title = "Fly",
-                    Content = flying and "Fly Enabled" or "Fly Disabled",
-                    Duration = 3
-                })
-                if not flying then
-                    bg:Destroy()
-                    bv:Destroy()
-                end
-            end
-        end)
-
-        UIS.InputEnded:Connect(function(input)
-            local key = input.KeyCode
-            if key == Enum.KeyCode.W then direction.w = false end
-            if key == Enum.KeyCode.S then direction.s = false end
-            if key == Enum.KeyCode.A then direction.a = false end
-            if key == Enum.KeyCode.D then direction.d = false end
-        end)
-
-        task.spawn(function()
-            while flying and bv and bg and hrp do
-                task.wait()
+            flyConnection = game:GetService("RunService").RenderStepped:Connect(function()
                 local cam = workspace.CurrentCamera
-                local move = Vector3.new()
+                local direction = Vector3.zero
 
-                if direction.w then move += cam.CFrame.LookVector end
-                if direction.s then move -= cam.CFrame.LookVector end
-                if direction.a then move -= cam.CFrame.RightVector end
-                if direction.d then move += cam.CFrame.RightVector end
+                if UIS:IsKeyDown(Enum.KeyCode.W) then direction += cam.CFrame.LookVector end
+                if UIS:IsKeyDown(Enum.KeyCode.S) then direction -= cam.CFrame.LookVector end
+                if UIS:IsKeyDown(Enum.KeyCode.A) then direction -= cam.CFrame.RightVector end
+                if UIS:IsKeyDown(Enum.KeyCode.D) then direction += cam.CFrame.RightVector end
 
-                if move.Magnitude > 0 then
-                    bv.Velocity = move.Unit * speed
-                else
-                    bv.Velocity = Vector3.zero
-                end
+                bv.Velocity = direction.Unit * 50
+                if direction.Magnitude == 0 then bv.Velocity = Vector3.zero end
 
                 bg.CFrame = cam.CFrame
+            end)
+        else
+            if flyConnection then flyConnection:Disconnect() end
+            for _, obj in ipairs(hrp:GetChildren()) do
+                if obj:IsA("BodyVelocity") or obj:IsA("BodyGyro") then
+                    obj:Destroy()
+                end
             end
-        end)
+        end
     end
 })
 
+-------------------------------------------------
+-- PLAYER TAB: WalkSpeed + JumpPower Settings --
+-------------------------------------------------
+local PlayerTab = Window:CreateTab("Player", 4483362458)
+
+PlayerTab:CreateSlider({
+    Name = "WalkSpeed",
+    Range = {16, 200},
+    Increment = 1,
+    Default = 16,
+    Callback = function(value)
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.WalkSpeed = value
+        end
+    end
+})
+
+PlayerTab:CreateSlider({
+    Name = "JumpPower",
+    Range = {50, 300},
+    Increment = 5,
+    Default = 50,
+    Callback = function(value)
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.JumpPower = value
+        end
+    end
+})
+
+-- Wallhop GUI
+PlayerTab:CreateButton({
+    Name = "Wallhop Toggle GUI 🧱",
+    Callback = function()
+        -- Check if already exists
+        if game.CoreGui:FindFirstChild("WallhopToggleGUI") then return end
+
+        local screenGui = Instance.new("ScreenGui", game.CoreGui)
+        screenGui.Name = "WallhopToggleGUI"
+        screenGui.ResetOnSpawn = false
+
+        local frame = Instance.new("Frame", screenGui)
+        frame.Size = UDim2.new(0, 200, 0, 100)
+        frame.Position = UDim2.new(0.5, -100, 0.5, -50)
+        frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+
+        local toggle = Instance.new("TextButton", frame)
+        toggle.Size = UDim2.new(1, 0, 0.5, 0)
+        toggle.Position = UDim2.new(0, 0, 0, 0)
+        toggle.Text = "Wallhop: OFF"
+        toggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        toggle.TextColor3 = Color3.new(1,1,1)
+
+        local enabled = false
+        toggle.MouseButton1Click:Connect(function()
+            enabled = not enabled
+            toggle.Text = "Wallhop: " .. (enabled and "ON" or "OFF")
+
+            -- You can handle wallhop logic here
+            -- Example: Rotate camera quickly
+            if enabled then
+                local cam = workspace.CurrentCamera
+                local originalCF = cam.CFrame
+                cam.CFrame = originalCF * CFrame.Angles(0, math.rad(90), 0)
+                task.wait(0.2)
+                cam.CFrame = originalCF
+            end
+        end)
+
+        local destroyBtn = Instance.new("TextButton", frame)
+        destroyBtn.Size = UDim2.new(1, 0, 0.5, 0)
+        destroyBtn.Position = UDim2.new(0, 0, 0.5, 0)
+        destroyBtn.Text = "Destroy GUI ❌"
+        destroyBtn.BackgroundColor3 = Color3.fromRGB(100, 30, 30)
+        destroyBtn.TextColor3 = Color3.new(1,1,1)
+
+        destroyBtn.MouseButton1Click:Connect(function()
+            screenGui:Destroy()
+        end)
+    end
+})
