@@ -11,10 +11,12 @@ local Window = Rayfield:CreateWindow({
     }
 })
 
--- MAIN TAB
+---------------------
+-- 🔥 MAIN TAB 🔥 --
+---------------------
 local MainTab = Window:CreateTab("Main", 4483362458)
 
--- Loop Touch Button
+-- Loop Touch
 local loopTouching = false
 MainTab:CreateButton({
     Name = "Loop Touch 🔁 (MAX)",
@@ -75,7 +77,7 @@ MainTab:CreateButton({
     end
 })
 
--- Teleport
+-- Teleport Button
 MainTab:CreateButton({
     Name = "Teleport to Troll Button 🛸",
     Callback = function()
@@ -86,7 +88,7 @@ MainTab:CreateButton({
     end
 })
 
--- Fly Toggle GUI Button
+-- Fly Button
 local flying = false
 local flyConnection
 MainTab:CreateButton({
@@ -123,9 +125,7 @@ MainTab:CreateButton({
                 if UIS:IsKeyDown(Enum.KeyCode.A) then direction -= cam.CFrame.RightVector end
                 if UIS:IsKeyDown(Enum.KeyCode.D) then direction += cam.CFrame.RightVector end
 
-                bv.Velocity = direction.Unit * 50
-                if direction.Magnitude == 0 then bv.Velocity = Vector3.zero end
-
+                bv.Velocity = direction.Magnitude > 0 and direction.Unit * 50 or Vector3.zero
                 bg.CFrame = cam.CFrame
             end)
         else
@@ -139,54 +139,52 @@ MainTab:CreateButton({
     end
 })
 
--------------------------------------------------
--- PLAYER TAB: WalkSpeed + JumpPower Settings --
--------------------------------------------------
+------------------------
+-- 🧍 PLAYER TAB 🧍 --
+------------------------
 local PlayerTab = Window:CreateTab("Player", 4483362458)
 
+-- WalkSpeed
 PlayerTab:CreateSlider({
-    Name = "WalkSpeed",
+    Name = "Speed",
     Range = {16, 200},
     Increment = 1,
     Default = 16,
     Callback = function(value)
-        if player.Character and player.Character:FindFirstChild("Humanoid") then
-            player.Character.Humanoid.WalkSpeed = value
-        end
+        local hum = player.Character and player.Character:FindFirstChild("Humanoid")
+        if hum then hum.WalkSpeed = value end
     end
 })
 
+-- JumpPower
 PlayerTab:CreateSlider({
-    Name = "JumpPower",
+    Name = "Jump Height",
     Range = {50, 300},
     Increment = 5,
     Default = 50,
     Callback = function(value)
-        if player.Character and player.Character:FindFirstChild("Humanoid") then
-            player.Character.Humanoid.JumpPower = value
-        end
+        local hum = player.Character and player.Character:FindFirstChild("Humanoid")
+        if hum then hum.JumpPower = value end
     end
 })
 
--- Wallhop GUI
+-- Wallhop Toggle GUI
 PlayerTab:CreateButton({
     Name = "Wallhop Toggle GUI 🧱",
     Callback = function()
-        -- Check if already exists
         if game.CoreGui:FindFirstChild("WallhopToggleGUI") then return end
 
-        local screenGui = Instance.new("ScreenGui", game.CoreGui)
-        screenGui.Name = "WallhopToggleGUI"
-        screenGui.ResetOnSpawn = false
+        local gui = Instance.new("ScreenGui", game.CoreGui)
+        gui.Name = "WallhopToggleGUI"
+        gui.ResetOnSpawn = false
 
-        local frame = Instance.new("Frame", screenGui)
+        local frame = Instance.new("Frame", gui)
         frame.Size = UDim2.new(0, 200, 0, 100)
         frame.Position = UDim2.new(0.5, -100, 0.5, -50)
         frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 
         local toggle = Instance.new("TextButton", frame)
         toggle.Size = UDim2.new(1, 0, 0.5, 0)
-        toggle.Position = UDim2.new(0, 0, 0, 0)
         toggle.Text = "Wallhop: OFF"
         toggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
         toggle.TextColor3 = Color3.new(1,1,1)
@@ -196,14 +194,12 @@ PlayerTab:CreateButton({
             enabled = not enabled
             toggle.Text = "Wallhop: " .. (enabled and "ON" or "OFF")
 
-            -- You can handle wallhop logic here
-            -- Example: Rotate camera quickly
-            if enabled then
+            if enabled and not UIS.MouseBehavior == Enum.MouseBehavior.LockCenter then
                 local cam = workspace.CurrentCamera
-                local originalCF = cam.CFrame
-                cam.CFrame = originalCF * CFrame.Angles(0, math.rad(90), 0)
-                task.wait(0.2)
-                cam.CFrame = originalCF
+                local original = cam.CFrame
+                cam.CFrame = original * CFrame.Angles(0, math.rad(90), 0)
+                task.wait(0.15)
+                cam.CFrame = original
             end
         end)
 
@@ -215,7 +211,7 @@ PlayerTab:CreateButton({
         destroyBtn.TextColor3 = Color3.new(1,1,1)
 
         destroyBtn.MouseButton1Click:Connect(function()
-            screenGui:Destroy()
+            gui:Destroy()
         end)
     end
 })
