@@ -1,0 +1,113 @@
+--[[
+ Key System for Hunter's Troll GUI
+ Correct key: Hunter62933*
+ GUI auto destroys itself after successful entry
+]]
+
+local key = "Hunter62933*"
+local keyLink = "https://direct-link.net/1366188/KmkSMzTOB8gv"
+
+local player = game.Players.LocalPlayer
+local CoreGui = game:GetService("CoreGui")
+
+-- Destroy old GUI if it exists
+if CoreGui:FindFirstChild("TrollKeyGUI") then
+    CoreGui.TrollKeyGUI:Destroy()
+end
+
+-- Create GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "TrollKeyGUI"
+gui.ResetOnSpawn = false
+gui.Parent = CoreGui
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 300, 0, 160)
+frame.Position = UDim2.new(0.5, -150, 0.5, -80)
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+frame.BorderSizePixel = 0
+frame.Parent = gui
+
+local uicorner = Instance.new("UICorner", frame)
+
+local title = Instance.new("TextLabel")
+title.Text = "Enter Key to Unlock Troll GUI 😈"
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.TextScaled = true
+title.Parent = frame
+
+local textbox = Instance.new("TextBox")
+textbox.PlaceholderText = "Enter Key Here..."
+textbox.Size = UDim2.new(1, -20, 0, 30)
+textbox.Position = UDim2.new(0, 10, 0, 50)
+textbox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+textbox.TextColor3 = Color3.fromRGB(255, 255, 255)
+textbox.ClearTextOnFocus = false
+textbox.Font = Enum.Font.Gotham
+textbox.TextScaled = true
+textbox.Parent = frame
+Instance.new("UICorner", textbox)
+
+local status = Instance.new("TextLabel")
+status.Text = ""
+status.Size = UDim2.new(1, -20, 0, 20)
+status.Position = UDim2.new(0, 10, 0, 85)
+status.BackgroundTransparency = 1
+status.TextColor3 = Color3.fromRGB(255, 0, 0)
+status.Font = Enum.Font.Gotham
+status.TextScaled = true
+status.Parent = frame
+
+local confirm = Instance.new("TextButton")
+confirm.Text = "Submit Key ✅"
+confirm.Size = UDim2.new(1, -20, 0, 30)
+confirm.Position = UDim2.new(0, 10, 0, 110)
+confirm.BackgroundColor3 = Color3.fromRGB(70, 130, 180)
+confirm.TextColor3 = Color3.fromRGB(255, 255, 255)
+confirm.Font = Enum.Font.GothamBold
+confirm.TextScaled = true
+confirm.Parent = frame
+Instance.new("UICorner", confirm)
+
+local linkBtn = Instance.new("TextButton")
+linkBtn.Text = "Get Key 🔑 (Copy Link)"
+linkBtn.Size = UDim2.new(1, -20, 0, 20)
+linkBtn.Position = UDim2.new(0, 10, 1, -25)
+linkBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+linkBtn.TextColor3 = Color3.fromRGB(255, 255, 0)
+linkBtn.Font = Enum.Font.Gotham
+linkBtn.TextScaled = true
+linkBtn.Parent = frame
+Instance.new("UICorner", linkBtn)
+
+-- Copy key link
+linkBtn.MouseButton1Click:Connect(function()
+    if setclipboard then
+        setclipboard(keyLink)
+        linkBtn.Text = "Copied Link!"
+        task.wait(1.5)
+        linkBtn.Text = "Get Key 🔑 (Copy Link)"
+    else
+        linkBtn.Text = "No Clipboard API!"
+        task.wait(1.5)
+        linkBtn.Text = "Get Key 🔑 (Copy Link)"
+    end
+end)
+
+-- Check key
+confirm.MouseButton1Click:Connect(function()
+    if textbox.Text == key then
+        status.Text = "Success! Loading..."
+        status.TextColor3 = Color3.fromRGB(0, 255, 0)
+        wait(1)
+        gui:Destroy()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/hunterhartnitt/script2/refs/heads/main/Troll%20script%20UPDATED.lua"))()
+    else
+        status.Text = "Invalid Key ❌"
+        status.TextColor3 = Color3.fromRGB(255, 0, 0)
+    end
+end)
